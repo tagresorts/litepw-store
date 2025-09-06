@@ -25,7 +25,7 @@ class DashboardController extends Controller
             ->visible()
             ->ordered()
             ->get()
-            ->map(function ($widget) {
+            ->map(function ($widget) use ($user) {
                 return [
                     'id' => $widget->id,
                     'type' => $widget->widget_type,
