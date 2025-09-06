@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, usePage } from '@inertiajs/vue3';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { ref, computed, onMounted } from 'vue';
 import DashboardWidget from '@/Components/Dashboard/DashboardWidget.vue';
 import NavigationSidebar from '@/Components/Navigation/NavigationSidebar.vue';
@@ -49,6 +49,8 @@ const props = defineProps<Props>();
 const sidebarCollapsed = ref(false);
 const sidebarDocked = ref(true);
 const isDarkMode = ref(false);
+const searchQuery = ref('');
+const showUserMenu = ref(false);
 
 // Toggle sidebar
 const toggleSidebar = () => {
@@ -63,6 +65,22 @@ const toggleSidebarDock = () => {
 const toggleDarkMode = () => {
     isDarkMode.value = !isDarkMode.value;
     document.documentElement.classList.toggle('dark');
+};
+
+// Search functionality
+const performSearch = () => {
+    if (searchQuery.value.trim()) {
+        router.visit(route('search', { q: searchQuery.value.trim() }));
+    }
+};
+
+const clearSearch = () => {
+    searchQuery.value = '';
+};
+
+// User menu functionality
+const toggleUserMenu = () => {
+    showUserMenu.value = !showUserMenu.value;
 };
 
 // Computed classes for main content area
@@ -87,6 +105,21 @@ onMounted(() => {
             document.documentElement.classList.add('dark');
         }
     }
+
+    // Close user menu when clicking outside
+    const handleClickOutside = (event: Event) => {
+        const userMenu = document.querySelector('.user-menu-container');
+        if (userMenu && !userMenu.contains(event.target as Node)) {
+            showUserMenu.value = false;
+        }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    
+    // Cleanup event listener on unmount
+    return () => {
+        document.removeEventListener('click', handleClickOutside);
+    };
 });
 </script>
 
@@ -128,6 +161,8 @@ onMounted(() => {
                             <!-- Search Bar -->
                             <div class="relative">
                                 <input
+                                    v-model="searchQuery"
+                                    @keyup.enter="performSearch"
                                     type="text"
                                     placeholder="Search credentials..."
                                     class="w-64 px-4 py-2 pl-10 pr-4 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600"
@@ -137,6 +172,15 @@ onMounted(() => {
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                     </svg>
                                 </div>
+                                <button
+                                    v-if="searchQuery"
+                                    @click="clearSearch"
+                                    class="absolute inset-y-0 right-0 flex items-center pr-3"
+                                >
+                                    <svg class="w-4 h-4 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
                             </div>
 
                             <!-- Dark Mode Toggle -->
@@ -153,13 +197,84 @@ onMounted(() => {
                             </button>
 
                             <!-- User Menu -->
-                            <div class="relative">
-                                <button class="flex items-center space-x-2 p-2 rounded-md text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700">
+                            <div class="relative user-menu-container">
+                                <button
+                                    @click="toggleUserMenu"
+                                    class="flex items-center space-x-2 p-2 rounded-md text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                                >
                                     <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
                                         {{ $page.props.auth.user.name.charAt(0).toUpperCase() }}
                                     </div>
                                     <span class="hidden md:block">{{ $page.props.auth.user.name }}</span>
+                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
                                 </button>
+                                
+                                <!-- Dropdown Menu -->
+                                <div
+                                    v-if="showUserMenu"
+                                    class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 border border-gray-200 dark:border-gray-700"
+                                >
+                                    <Link
+                                        :href="route('profile.edit')"
+                                        class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                    >
+                                        <div class="flex items-center space-x-2">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                            </svg>
+                                            <span>Profile</span>
+                                        </div>
+                                    </Link>
+                                    <Link
+                                        :href="route('credentials.index')"
+                                        class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                    >
+                                        <div class="flex items-center space-x-2">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1721 9z" />
+                                            </svg>
+                                            <span>All Credentials</span>
+                                        </div>
+                                    </Link>
+                                    <Link
+                                        :href="route('groups.index')"
+                                        class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                    >
+                                        <div class="flex items-center space-x-2">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                            </svg>
+                                            <span>Groups</span>
+                                        </div>
+                                    </Link>
+                                    <Link
+                                        :href="route('audit-logs.index')"
+                                        class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                    >
+                                        <div class="flex items-center space-x-2">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                            <span>Audit Logs</span>
+                                        </div>
+                                    </Link>
+                                    <div class="border-t border-gray-200 dark:border-gray-600 my-1"></div>
+                                    <Link
+                                        :href="route('logout')"
+                                        method="post"
+                                        as="button"
+                                        class="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                    >
+                                        <div class="flex items-center space-x-2">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                            </svg>
+                                            <span>Log Out</span>
+                                        </div>
+                                    </Link>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -188,24 +303,33 @@ onMounted(() => {
 
                 <!-- Quick Actions -->
                 <div class="mt-8 flex flex-wrap gap-4">
-                    <button class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    <Link
+                        :href="route('credentials.create')"
+                        class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                         </svg>
                         Add Credential
-                    </button>
-                    <button class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                    </Link>
+                    <Link
+                        :href="route('groups.create')"
+                        class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    >
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                         </svg>
                         Create Group
-                    </button>
-                    <button class="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                    </Link>
+                    <Link
+                        :href="route('audit-logs.index')"
+                        class="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                    >
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
-                        Export Data
-                    </button>
+                        View Audit Logs
+                    </Link>
                 </div>
             </main>
         </div>

@@ -39,6 +39,24 @@ const showingNavigationDropdown = ref(false);
                                 >
                                     Dashboard
                                 </NavLink>
+                                <NavLink
+                                    :href="route('credentials.index')"
+                                    :active="route().current('credentials.*')"
+                                >
+                                    Credentials
+                                </NavLink>
+                                <NavLink
+                                    :href="route('groups.index')"
+                                    :active="route().current('groups.*')"
+                                >
+                                    Groups
+                                </NavLink>
+                                <NavLink
+                                    :href="route('audit-logs.index')"
+                                    :active="route().current('audit-logs.*')"
+                                >
+                                    Audit Logs
+                                </NavLink>
                             </div>
                         </div>
 
@@ -145,6 +163,24 @@ const showingNavigationDropdown = ref(false);
                             :active="route().current('dashboard')"
                         >
                             Dashboard
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('credentials.index')"
+                            :active="route().current('credentials.*')"
+                        >
+                            Credentials
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('groups.index')"
+                            :active="route().current('groups.*')"
+                        >
+                            Groups
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('audit-logs.index')"
+                            :active="route().current('audit-logs.*')"
+                        >
+                            Audit Logs
                         </ResponsiveNavLink>
                     </div>
 

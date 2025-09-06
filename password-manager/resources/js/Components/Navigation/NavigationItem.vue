@@ -1,7 +1,8 @@
 <template>
     <div>
-        <button
-            @click="toggleExpanded"
+        <Link
+            :href="route('groups.show', item.id)"
+            @click.prevent="handleClick"
             class="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
             :class="{ 'pl-6': level > 0 && !collapsed }"
             :title="collapsed ? item.name : ''"
@@ -38,7 +39,7 @@
             >
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
-        </button>
+        </Link>
 
         <!-- Children -->
         <div
@@ -68,6 +69,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { Link, router } from '@inertiajs/vue3';
 
 interface NavigationTreeItem {
     id: number;
@@ -94,9 +96,14 @@ const hasChildren = computed(() => {
     return props.item.children && props.item.children.length > 0;
 });
 
-const toggleExpanded = () => {
+const handleClick = (event: Event) => {
     if (hasChildren.value && !props.collapsed) {
+        // If it has children and sidebar is not collapsed, toggle expansion
+        event.preventDefault();
         isExpanded.value = !isExpanded.value;
+    } else {
+        // Navigate to the group page
+        router.visit(route('groups.show', props.item.id));
     }
 };
 
