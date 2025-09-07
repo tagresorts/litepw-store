@@ -57,36 +57,52 @@ class CredentialController extends Controller
             'group_id' => 'nullable|exists:groups,id',
         ]);
 
-        // Create the main credential record
-        $credential = Credential::create([
+        // Prepare data for all credential entries
+        $credentialData = [
             'title' => $request->title,
-            'username' => $request->credential_entries[0]['username'], // Primary username
-            'encrypted_password' => encrypt($request->credential_entries[0]['password']), // Primary password
-            'url' => !empty($request->credential_entries[0]['urls']) ? $request->credential_entries[0]['urls'][0] : null, // Primary URL
             'notes' => $request->notes,
             'group_id' => $request->group_id,
             'created_by' => auth()->id(),
-        ]);
+        ];
 
-        // Store additional credential entries in custom_fields as JSON
-        $additionalEntries = [];
-        for ($i = 1; $i < count($request->credential_entries); $i++) {
+        // Process up to 6 credential entries
+        $maxEntries = min(6, count($request->credential_entries));
+        
+        for ($i = 0; $i < $maxEntries; $i++) {
             $entry = $request->credential_entries[$i];
-            $additionalEntries[] = [
-                'username' => $entry['username'],
-                'password' => encrypt($entry['password']), // Encrypt additional passwords too
-                'urls' => array_filter($entry['urls'] ?? []), // Remove empty URLs
-            ];
+            $entryNum = $i + 1;
+            
+            if ($entryNum === 1) {
+                // Primary entry
+                $credentialData['username'] = $entry['username'];
+                $credentialData['encrypted_password'] = encrypt($entry['password']);
+                $credentialData['url'] = !empty($entry['urls']) ? $entry['urls'][0] : null;
+            } else {
+                // Additional entries
+                $credentialData["username_{$entryNum}"] = $entry['username'];
+                $credentialData["encrypted_password_{$entryNum}"] = encrypt($entry['password']);
+            }
+            
+            // Store additional URLs (up to 10 total)
+            $urlIndex = 1;
+            foreach ($entry['urls'] as $url) {
+                if ($url && trim($url)) {
+                    if ($entryNum === 1 && $urlIndex === 1) {
+                        // First URL already stored in 'url' field
+                        $urlIndex++;
+                        continue;
+                    }
+                    
+                    $urlField = $entryNum === 1 ? "url_{$urlIndex}" : "url_" . (($entryNum - 1) * 2 + $urlIndex);
+                    if ($urlIndex <= 10) {
+                        $credentialData[$urlField] = $url;
+                        $urlIndex++;
+                    }
+                }
+            }
         }
 
-        // Store additional entries in custom_fields
-        if (!empty($additionalEntries)) {
-            $credential->update([
-                'custom_fields' => [
-                    'additional_entries' => $additionalEntries
-                ]
-            ]);
-        }
+        Credential::create($credentialData);
 
         return redirect()->route('credentials.index')
             ->with('success', 'Credential created successfully.');

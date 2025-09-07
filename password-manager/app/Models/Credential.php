@@ -27,10 +27,24 @@ class Credential extends Model
         'is_favorite',
         'access_count',
         'last_accessed_at',
+        // Additional username/password pairs
+        'username_2', 'encrypted_password_2',
+        'username_3', 'encrypted_password_3',
+        'username_4', 'encrypted_password_4',
+        'username_5', 'encrypted_password_5',
+        'username_6', 'encrypted_password_6',
+        // Additional URLs
+        'url_2', 'url_3', 'url_4', 'url_5', 'url_6',
+        'url_7', 'url_8', 'url_9', 'url_10',
     ];
 
     protected $hidden = [
         'encrypted_password',
+        'encrypted_password_2',
+        'encrypted_password_3',
+        'encrypted_password_4',
+        'encrypted_password_5',
+        'encrypted_password_6',
     ];
 
     protected $casts = [
@@ -86,6 +100,50 @@ class Credential extends Model
 
         try {
             return Crypt::decrypt($this->encrypted_password);
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Get the decrypted password for additional entries.
+     */
+    public function getPassword2Attribute(): ?string
+    {
+        return $this->getDecryptedPassword('encrypted_password_2');
+    }
+
+    public function getPassword3Attribute(): ?string
+    {
+        return $this->getDecryptedPassword('encrypted_password_3');
+    }
+
+    public function getPassword4Attribute(): ?string
+    {
+        return $this->getDecryptedPassword('encrypted_password_4');
+    }
+
+    public function getPassword5Attribute(): ?string
+    {
+        return $this->getDecryptedPassword('encrypted_password_5');
+    }
+
+    public function getPassword6Attribute(): ?string
+    {
+        return $this->getDecryptedPassword('encrypted_password_6');
+    }
+
+    /**
+     * Helper method to decrypt passwords.
+     */
+    private function getDecryptedPassword(string $field): ?string
+    {
+        if (!$this->$field) {
+            return null;
+        }
+
+        try {
+            return Crypt::decrypt($this->$field);
         } catch (\Exception $e) {
             return null;
         }
