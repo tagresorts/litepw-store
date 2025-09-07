@@ -48,22 +48,45 @@ class CredentialController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'username' => 'required|string|max:255',
-            'password' => 'required|string',
-            'url' => 'nullable|url',
+            'credential_entries' => 'required|array|min:1',
+            'credential_entries.*.username' => 'required|string|max:255',
+            'credential_entries.*.password' => 'required|string',
+            'credential_entries.*.urls' => 'nullable|array',
+            'credential_entries.*.urls.*' => 'nullable|string',
             'notes' => 'nullable|string',
             'group_id' => 'nullable|exists:groups,id',
         ]);
 
-        Credential::create([
+        // Create the main credential record
+        $credential = Credential::create([
             'title' => $request->title,
-            'username' => $request->username,
-            'encrypted_password' => encrypt($request->password),
-            'url' => $request->url,
+            'username' => $request->credential_entries[0]['username'], // Primary username
+            'encrypted_password' => encrypt($request->credential_entries[0]['password']), // Primary password
+            'url' => !empty($request->credential_entries[0]['urls']) ? $request->credential_entries[0]['urls'][0] : null, // Primary URL
             'notes' => $request->notes,
             'group_id' => $request->group_id,
             'created_by' => auth()->id(),
         ]);
+
+        // Store additional credential entries in custom_fields as JSON
+        $additionalEntries = [];
+        for ($i = 1; $i < count($request->credential_entries); $i++) {
+            $entry = $request->credential_entries[$i];
+            $additionalEntries[] = [
+                'username' => $entry['username'],
+                'password' => encrypt($entry['password']), // Encrypt additional passwords too
+                'urls' => array_filter($entry['urls'] ?? []), // Remove empty URLs
+            ];
+        }
+
+        // Store additional entries in custom_fields
+        if (!empty($additionalEntries)) {
+            $credential->update([
+                'custom_fields' => [
+                    'additional_entries' => $additionalEntries
+                ]
+            ]);
+        }
 
         return redirect()->route('credentials.index')
             ->with('success', 'Credential created successfully.');
