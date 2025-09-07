@@ -56,12 +56,13 @@
                                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                 >
                                     <option value="">No parent (top-level group)</option>
-                                    <option v-for="group in groups" :key="group.id" :value="group.id">
-                                        {{ '  '.repeat(group.level) }}{{ group.name }}
+                                    <option v-for="group in props.groups" :key="group.id" :value="group.id">
+                                        {{ '  '.repeat(group.level || 0) }}{{ group.name }}
                                     </option>
                                 </select>
                                 <p class="mt-1 text-sm text-gray-500">
                                     Select a parent group to create a nested structure
+                                    <span v-if="props.groups.length === 0" class="text-orange-600"> (No groups available yet)</span>
                                 </p>
                                 <p v-if="form.errors.parent_id" class="mt-1 text-sm text-red-600">
                                     {{ form.errors.parent_id }}
@@ -107,9 +108,10 @@ interface Group {
 
 interface Props {
     groups: Group[];
+    navigationTree: any[];
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
 
 const form = useForm({
     name: '',

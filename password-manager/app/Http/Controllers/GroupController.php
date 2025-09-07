@@ -32,9 +32,14 @@ class GroupController extends Controller
      */
     public function create()
     {
+        $groups = Group::where('created_by', auth()->id())
+            ->orderBy('name')
+            ->get();
+            
         $navigationTree = $this->getNavigationTree();
         
         return Inertia::render('Groups/Create', [
+            'groups' => $groups,
             'navigationTree' => $navigationTree
         ]);
     }
