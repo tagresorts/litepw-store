@@ -160,7 +160,7 @@ const credentialEntries = reactive<CredentialEntry[]>([
     }
 ]);
 
-const form = useForm({
+const form: any = useForm({
     title: '',
     credential_entries: [] as any[],
     notes: '',
