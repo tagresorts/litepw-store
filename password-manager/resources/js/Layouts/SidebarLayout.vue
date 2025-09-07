@@ -36,7 +36,12 @@ const toggleSidebarDock = () => {
 // Toggle dark mode
 const toggleDarkMode = () => {
     isDarkMode.value = !isDarkMode.value;
-    document.documentElement.classList.toggle('dark');
+    document.documentElement.classList.toggle('dark', isDarkMode.value);
+    try {
+        localStorage.setItem('pm_theme', isDarkMode.value ? 'dark' : 'light');
+    } catch (e) {
+        // ignore storage failures
+    }
 };
 
 // Search functionality
@@ -66,17 +71,31 @@ const mainContentClasses = computed(() => {
 });
 
 onMounted(() => {
-    // Load user preferences for sidebar and theme
+    // Load persisted theme from localStorage first
+    try {
+        const storedTheme = localStorage.getItem('pm_theme');
+        if (storedTheme === 'dark') {
+            isDarkMode.value = true;
+        } else if (storedTheme === 'light') {
+            isDarkMode.value = false;
+        }
+        (window as any).__pmStoredTheme = storedTheme;
+    } catch (e) {
+        // ignore storage failures
+    }
+
+    // Load user preferences for sidebar and theme (fallbacks)
     const preferences = usePage().props.auth?.user?.preferences;
     if (preferences) {
         sidebarCollapsed.value = preferences.sidebar_collapsed || false;
         sidebarDocked.value = preferences.sidebar_docked !== false;
-        isDarkMode.value = preferences.dark_mode || false;
-        
-        if (isDarkMode.value) {
-            document.documentElement.classList.add('dark');
+        if ((window as any).__pmStoredTheme == null) {
+            isDarkMode.value = preferences.dark_mode || false;
         }
     }
+
+    // Apply theme class
+    document.documentElement.classList.toggle('dark', isDarkMode.value);
 
     // Close user menu when clicking outside
     const handleClickOutside = (event: Event) => {
