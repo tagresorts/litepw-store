@@ -39,49 +39,8 @@ class DatabaseSeeder extends Seeder
         $adminUser->roles()->attach($adminRole->id);
         $testUser->roles()->attach($userRole->id);
 
-        // Create sample groups
-        $rootGroup = \App\Models\Group::create([
-            'name' => 'System Applications',
-            'description' => 'Root group for all system applications',
-            'created_by' => $adminUser->id,
-        ]);
-
-        $prodGroup = \App\Models\Group::create([
-            'name' => 'Production',
-            'description' => 'Production environment credentials',
-            'parent_id' => $rootGroup->id,
-            'created_by' => $adminUser->id,
-        ]);
-
-        $webAppGroup = \App\Models\Group::create([
-            'name' => 'Web Applications',
-            'description' => 'Web application credentials',
-            'parent_id' => $prodGroup->id,
-            'created_by' => $adminUser->id,
-        ]);
-
-        // Create sample credentials
-        \App\Models\Credential::create([
-            'title' => 'Database Server',
-            'username' => 'db_admin',
-            'password' => 'SecureDBPassword123!',
-            'url' => 'mysql://db.example.com:3306',
-            'notes' => 'Main production database server',
-            'tags' => ['database', 'production', 'mysql'],
-            'group_id' => $webAppGroup->id,
-            'created_by' => $adminUser->id,
-        ]);
-
-        \App\Models\Credential::create([
-            'title' => 'Redis Cache',
-            'username' => 'redis_user',
-            'password' => 'RedisPassword456!',
-            'url' => 'redis://cache.example.com:6379',
-            'notes' => 'Redis cache server for session storage',
-            'tags' => ['cache', 'redis', 'production'],
-            'group_id' => $webAppGroup->id,
-            'created_by' => $adminUser->id,
-        ]);
+        // Create default infrastructure credentials
+        $this->call(DefaultCredentialsSeeder::class);
 
         // Create default dashboard widgets for admin user
         \App\Models\DashboardWidget::create([
