@@ -91,8 +91,23 @@ class GroupController extends Controller
             abort(403);
         }
         
+        $credentials = Credential::where('group_id', $group->id)
+            ->where('created_by', auth()->id())
+            ->orderBy('title')
+            ->get();
+            
+        $availableGroups = Group::where('created_by', auth()->id())
+            ->where('id', '!=', $group->id)
+            ->orderBy('name')
+            ->get();
+            
+        $navigationTree = $this->getNavigationTree();
+        
         return Inertia::render('Groups/Edit', [
-            'group' => $group
+            'group' => $group,
+            'credentials' => $credentials,
+            'availableGroups' => $availableGroups,
+            'navigationTree' => $navigationTree
         ]);
     }
 
