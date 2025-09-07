@@ -19,6 +19,13 @@ class CredentialController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+        // Add dynamic credential entries to each credential
+        $credentials->transform(function ($credential) {
+            $credential->credential_entries = $credential->getAllCredentialEntries();
+            $credential->entry_count = $credential->getCredentialEntryCount();
+            return $credential;
+        });
+
         $navigationTree = $this->getNavigationTree();
 
         return Inertia::render('Credentials/Index', [
@@ -116,6 +123,10 @@ class CredentialController extends Controller
         if ($credential->created_by !== auth()->id()) {
             abort(403);
         }
+        
+        // Add dynamic credential entries
+        $credential->credential_entries = $credential->getAllCredentialEntries();
+        $credential->entry_count = $credential->getCredentialEntryCount();
         
         return Inertia::render('Credentials/Show', [
             'credential' => $credential->load('group')

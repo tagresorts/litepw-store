@@ -150,6 +150,100 @@ class Credential extends Model
     }
 
     /**
+     * Get all credential entries dynamically (only those with data).
+     */
+    public function getAllCredentialEntries(): array
+    {
+        $entries = [];
+        
+        // Check primary entry
+        if ($this->username || $this->encrypted_password) {
+            $entries[] = [
+                'id' => 1,
+                'username' => $this->username,
+                'password' => $this->password,
+                'urls' => $this->getAllUrlsForEntry(1),
+            ];
+        }
+        
+        // Check additional entries (2-6)
+        for ($i = 2; $i <= 6; $i++) {
+            $usernameField = "username_{$i}";
+            $passwordField = "encrypted_password_{$i}";
+            
+            if ($this->$usernameField || $this->$passwordField) {
+                $entries[] = [
+                    'id' => $i,
+                    'username' => $this->$usernameField,
+                    'password' => $this->{"password{$i}"},
+                    'urls' => $this->getAllUrlsForEntry($i),
+                ];
+            }
+        }
+        
+        return $entries;
+    }
+
+    /**
+     * Get all URLs for a specific credential entry.
+     */
+    private function getAllUrlsForEntry(int $entryId): array
+    {
+        $urls = [];
+        
+        if ($entryId === 1) {
+            // Primary entry URLs
+            if ($this->url) {
+                $urls[] = $this->url;
+            }
+            for ($i = 2; $i <= 10; $i++) {
+                $urlField = "url_{$i}";
+                if ($this->$urlField) {
+                    $urls[] = $this->$urlField;
+                }
+            }
+        } else {
+            // Additional entries - URLs are distributed across url_2 to url_10
+            // This is a simplified approach - in practice, you might want to store
+            // URLs in a separate table or use a different distribution strategy
+            $startIndex = ($entryId - 1) * 2; // Rough distribution
+            for ($i = $startIndex; $i < $startIndex + 2 && $i <= 10; $i++) {
+                $urlField = "url_{$i}";
+                if ($this->$urlField) {
+                    $urls[] = $this->$urlField;
+                }
+            }
+        }
+        
+        return array_filter($urls); // Remove empty values
+    }
+
+    /**
+     * Get the count of credential entries that have data.
+     */
+    public function getCredentialEntryCount(): int
+    {
+        $count = 0;
+        
+        // Check primary entry
+        if ($this->username || $this->encrypted_password) {
+            $count++;
+        }
+        
+        // Check additional entries
+        for ($i = 2; $i <= 6; $i++) {
+            $usernameField = "username_{$i}";
+            $passwordField = "encrypted_password_{$i}";
+            
+            if ($this->$usernameField || $this->$passwordField) {
+                $count++;
+            }
+        }
+        
+        return $count;
+    }
+
+    /**
      * Check if password has expired.
      */
     public function isExpired(): bool
