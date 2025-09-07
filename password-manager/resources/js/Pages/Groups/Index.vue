@@ -1,11 +1,9 @@
 <template>
     <Head title="Groups" />
 
-    <AuthenticatedLayout>
+    <SidebarLayout>
         <template #header>
-            <h2 class="text-xl font-semibold leading-tight text-gray-800">
-                Groups
-            </h2>
+            Groups
         </template>
 
         <div class="py-12">
@@ -112,12 +110,12 @@
                 </div>
             </div>
         </div>
-    </AuthenticatedLayout>
+    </SidebarLayout>
 </template>
 
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import SidebarLayout from '@/Layouts/SidebarLayout.vue';
 
 interface Group {
     id: number;

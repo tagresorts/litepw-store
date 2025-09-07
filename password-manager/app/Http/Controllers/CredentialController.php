@@ -19,8 +19,11 @@ class CredentialController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+        $navigationTree = $this->getNavigationTree();
+
         return Inertia::render('Credentials/Index', [
-            'credentials' => $credentials
+            'credentials' => $credentials,
+            'navigationTree' => $navigationTree
         ]);
     }
 
@@ -30,9 +33,11 @@ class CredentialController extends Controller
     public function create()
     {
         $groups = Group::where('user_id', auth()->id())->get();
+        $navigationTree = $this->getNavigationTree();
         
         return Inertia::render('Credentials/Create', [
-            'groups' => $groups
+            'groups' => $groups,
+            'navigationTree' => $navigationTree
         ]);
     }
 
@@ -211,5 +216,26 @@ class CredentialController extends Controller
             'credentials' => $credentials,
             'query' => $query
         ]);
+    }
+
+    /**
+     * Get navigation tree for sidebar
+     */
+    private function getNavigationTree()
+    {
+        $groups = Group::where('user_id', auth()->id())
+            ->orderBy('name')
+            ->get();
+
+        return $groups->map(function ($group) {
+            return [
+                'id' => $group->id,
+                'name' => $group->name,
+                'description' => $group->description,
+                'level' => 0,
+                'credential_count' => $group->credentials()->count(),
+                'children' => [],
+            ];
+        })->toArray();
     }
 }

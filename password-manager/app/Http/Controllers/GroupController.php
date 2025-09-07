@@ -19,8 +19,11 @@ class GroupController extends Controller
             ->orderBy('name')
             ->get();
 
+        $navigationTree = $this->getNavigationTree();
+
         return Inertia::render('Groups/Index', [
-            'groups' => $groups
+            'groups' => $groups,
+            'navigationTree' => $navigationTree
         ]);
     }
 
@@ -29,7 +32,11 @@ class GroupController extends Controller
      */
     public function create()
     {
-        return Inertia::render('Groups/Create');
+        $navigationTree = $this->getNavigationTree();
+        
+        return Inertia::render('Groups/Create', [
+            'navigationTree' => $navigationTree
+        ]);
     }
 
     /**
@@ -186,5 +193,26 @@ class GroupController extends Controller
         return response($csvData)
             ->header('Content-Type', 'text/csv')
             ->header('Content-Disposition', 'attachment; filename="' . $group->name . '_credentials.csv"');
+    }
+
+    /**
+     * Get navigation tree for sidebar
+     */
+    private function getNavigationTree()
+    {
+        $groups = Group::where('user_id', auth()->id())
+            ->orderBy('name')
+            ->get();
+
+        return $groups->map(function ($group) {
+            return [
+                'id' => $group->id,
+                'name' => $group->name,
+                'description' => $group->description,
+                'level' => 0,
+                'credential_count' => $group->credentials()->count(),
+                'children' => [],
+            ];
+        })->toArray();
     }
 }

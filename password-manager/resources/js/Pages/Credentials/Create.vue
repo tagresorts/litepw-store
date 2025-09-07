@@ -1,11 +1,9 @@
 <template>
     <Head title="Add Credential" />
 
-    <AuthenticatedLayout>
+    <SidebarLayout>
         <template #header>
-            <h2 class="text-xl font-semibold leading-tight text-gray-800">
-                Add New Credential
-            </h2>
+            Add New Credential
         </template>
 
         <div class="py-12">
@@ -163,13 +161,13 @@
                 </div>
             </div>
         </div>
-    </AuthenticatedLayout>
+    </SidebarLayout>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import SidebarLayout from '@/Layouts/SidebarLayout.vue';
 
 interface Group {
     id: number;
