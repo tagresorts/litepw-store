@@ -83,6 +83,47 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Results: Groups (below credentials) -->
+                <div class="bg-white shadow-sm sm:rounded-lg mt-6">
+                    <div class="p-6">
+                        <h3 class="text-lg font-medium mb-4">Groups</h3>
+                        <div v-if="groups.length === 0 && query" class="text-center py-8 text-gray-500">
+                            <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                            <p class="text-lg font-medium mb-2">No groups found</p>
+                        </div>
+                        <div v-else-if="groups.length === 0" class="text-center py-8 text-gray-500">
+                            <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                            <p class="text-lg font-medium mb-2">Start searching</p>
+                            <p>Enter a search term to find your groups and credentials.</p>
+                        </div>
+                        <div v-else class="grid gap-3">
+                            <div
+                                v-for="group in groups"
+                                :key="group.id"
+                                class="bg-gray-50 rounded-lg p-3 hover:bg-gray-100 transition-colors flex items-center justify-between"
+                            >
+                                <div class="flex items-center space-x-3">
+                                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                    </svg>
+                                    <div>
+                                        <h4 class="font-medium text-gray-900">{{ group.name }}</h4>
+                                        <p v-if="group.description" class="text-xs text-gray-500">{{ group.description }}</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <Link :href="route('groups.show', group.id)" class="text-blue-600 hover:text-blue-800 text-sm">View</Link>
+                                    <Link :href="route('groups.edit', group.id)" class="text-gray-600 hover:text-gray-800 text-sm">Edit</Link>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </SidebarLayout>
