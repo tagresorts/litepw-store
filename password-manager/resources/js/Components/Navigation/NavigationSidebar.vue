@@ -142,6 +142,7 @@
                         <div v-if="expanded.groups && !collapsed" class="mt-1 ml-3 space-y-1">
                             <Link :href="route('groups.index')" class="block px-3 py-1.5 rounded-md text-sm text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700">List</Link>
                             <Link :href="route('groups.create')" class="block px-3 py-1.5 rounded-md text-sm text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700">Create</Link>
+                            <Link :href="route('groups.index')" class="block px-3 py-1.5 rounded-md text-sm text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-gray-700">Permissions</Link>
                         </div>
                     </div>
 
