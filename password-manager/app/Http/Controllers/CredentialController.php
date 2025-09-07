@@ -120,7 +120,8 @@ class CredentialController extends Controller
      */
     public function show(Credential $credential)
     {
-        if ($credential->created_by !== auth()->id()) {
+        $user = auth()->user();
+        if (!$user->canAccessCredential($credential, 'read')) {
             abort(403);
         }
         
@@ -138,7 +139,8 @@ class CredentialController extends Controller
      */
     public function edit(Credential $credential)
     {
-        if ($credential->created_by !== auth()->id()) {
+        $user = auth()->user();
+        if (!$user->canAccessCredential($credential, 'write')) {
             abort(403);
         }
         
@@ -160,7 +162,8 @@ class CredentialController extends Controller
      */
     public function update(Request $request, Credential $credential)
     {
-        if ($credential->created_by !== auth()->id()) {
+        $user = auth()->user();
+        if (!$user->canAccessCredential($credential, 'write')) {
             abort(403);
         }
         
@@ -246,7 +249,8 @@ class CredentialController extends Controller
      */
     public function destroy(Credential $credential)
     {
-        if ($credential->created_by !== auth()->id()) {
+        $user = auth()->user();
+        if (!$user->canAccessCredential($credential, 'admin')) {
             abort(403);
         }
         

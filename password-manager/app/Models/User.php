@@ -127,6 +127,58 @@ class User extends Authenticatable
     }
 
     /**
+     * Resolve effective permission for a group by walking up the hierarchy.
+     * Allowed permissions: read, write, admin
+     */
+    public function resolveGroupPermission(?Group $group): ?string
+    {
+        $current = $group;
+        while ($current) {
+            $perm = $this->groupPermissions()
+                ->where('group_id', $current->id)
+                ->value('permission_type');
+            if ($perm) {
+                return $perm;
+            }
+            $current = $current->parent ?? null;
+        }
+        return null;
+    }
+
+    /**
+     * Check access to a credential: explicit creator/admin, or inherited via groups.
+     */
+    public function canAccessCredential(Credential $credential, string $level = 'read'): bool
+    {
+        // Creator always has admin
+        if ($credential->created_by === $this->id) {
+            return true;
+        }
+
+        // Determine required levels
+        $order = ['read' => 1, 'write' => 2, 'admin' => 3];
+
+        // Resolve from credential's group
+        $group = $credential->group ?? null;
+        $perm = $this->resolveGroupPermission($group);
+        if ($perm && $order[$perm] >= $order[$level]) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Check access to a group itself (read/write/admin) via hierarchy.
+     */
+    public function canAccessGroup(Group $group, string $level = 'read'): bool
+    {
+        $order = ['read' => 1, 'write' => 2, 'admin' => 3];
+        $perm = $this->resolveGroupPermission($group);
+        return $perm ? ($order[$perm] >= $order[$level]) : false;
+    }
+
+    /**
      * Check if user has 2FA enabled.
      */
     public function hasTwoFactorEnabled(): bool

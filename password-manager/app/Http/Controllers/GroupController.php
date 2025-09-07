@@ -73,7 +73,8 @@ class GroupController extends Controller
      */
     public function show(Group $group)
     {
-        if ($group->created_by !== auth()->id()) {
+        $user = auth()->user();
+        if (!$user->canAccessGroup($group, 'read')) {
             abort(403);
         }
         
@@ -93,7 +94,8 @@ class GroupController extends Controller
      */
     public function edit(Group $group)
     {
-        if ($group->created_by !== auth()->id()) {
+        $user = auth()->user();
+        if (!$user->canAccessGroup($group, 'write')) {
             abort(403);
         }
         
@@ -122,7 +124,8 @@ class GroupController extends Controller
      */
     public function update(Request $request, Group $group)
     {
-        if ($group->created_by !== auth()->id()) {
+        $user = auth()->user();
+        if (!$user->canAccessGroup($group, 'write')) {
             abort(403);
         }
         
@@ -147,7 +150,8 @@ class GroupController extends Controller
      */
     public function destroy(Group $group)
     {
-        if ($group->created_by !== auth()->id()) {
+        $user = auth()->user();
+        if (!$user->canAccessGroup($group, 'admin')) {
             abort(403);
         }
         
