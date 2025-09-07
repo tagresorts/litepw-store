@@ -16,6 +16,7 @@ class GroupController extends Controller
     {
         $groups = Group::where('created_by', auth()->id())
             ->withCount('credentials')
+            ->orderBy('level')
             ->orderBy('name')
             ->get();
 
