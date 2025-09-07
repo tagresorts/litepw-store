@@ -26,12 +26,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('groups', GroupController::class);
     Route::post('/groups/{group}/move', [GroupController::class, 'move'])->name('groups.move');
     Route::get('/groups/{group}/export', [GroupController::class, 'export'])->name('groups.export');
+    Route::get('/groups/{group}/permissions', [GroupController::class, 'permissions'])->name('groups.permissions');
+    Route::post('/groups/{group}/permissions', [GroupController::class, 'savePermissions'])->name('groups.permissions.save');
     
     // Credential management
     Route::resource('credentials', CredentialController::class);
     Route::post('/credentials/{credential}/favorite', [CredentialController::class, 'toggleFavorite'])->name('credentials.favorite');
     Route::post('/credentials/generate-password', [CredentialController::class, 'generatePassword'])->name('credentials.generate-password');
     Route::get('/credentials/{credential}/password', [CredentialController::class, 'getPassword'])->name('credentials.password');
+    Route::get('/credentials/export', [CredentialController::class, 'exportAll'])->name('credentials.export.all');
+    Route::get('/credentials/{credential}/export', [CredentialController::class, 'exportOne'])->name('credentials.export.one');
     
     // Search functionality
     Route::get('/search', [CredentialController::class, 'search'])->name('search');

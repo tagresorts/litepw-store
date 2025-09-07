@@ -220,6 +220,61 @@ class GroupController extends Controller
     }
 
     /**
+     * Show permissions editor for a group.
+     */
+    public function permissions(Group $group)
+    {
+        $user = auth()->user();
+        if (!$user->canAccessGroup($group, 'admin')) {
+            abort(403);
+        }
+
+        $users = \App\Models\User::select('id','name','email')->orderBy('name')->get();
+        $existing = $group->permissions()->get(['user_id','effect','level','can_export','can_share']);
+
+        return Inertia::render('Groups/Permissions', [
+            'group' => $group,
+            'users' => $users,
+            'permissions' => $existing,
+            'navigationTree' => $this->getNavigationTree(),
+        ]);
+    }
+
+    /**
+     * Save permissions for a group.
+     */
+    public function savePermissions(Request $request, Group $group)
+    {
+        $user = auth()->user();
+        if (!$user->canAccessGroup($group, 'admin')) {
+            abort(403);
+        }
+
+        $data = $request->validate([
+            'entries' => 'required|array',
+            'entries.*.user_id' => 'required|exists:users,id',
+            'entries.*.effect' => 'required|in:allow,deny',
+            'entries.*.level' => 'required|in:read,write,admin',
+            'entries.*.can_export' => 'boolean',
+            'entries.*.can_share' => 'boolean',
+        ]);
+
+        foreach ($data['entries'] as $entry) {
+            $group->permissions()->updateOrCreate(
+                ['user_id' => $entry['user_id']],
+                [
+                    'effect' => $entry['effect'],
+                    'level' => $entry['level'],
+                    'can_export' => $entry['can_export'] ?? false,
+                    'can_share' => $entry['can_share'] ?? false,
+                ]
+            );
+        }
+
+        return redirect()->route('groups.permissions', $group->id)->with('success', 'Permissions updated.');
+    }
+
+    /**
      * Get navigation tree for sidebar
      */
     private function getNavigationTree()
