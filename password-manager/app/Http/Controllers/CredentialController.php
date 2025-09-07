@@ -306,24 +306,44 @@ class CredentialController extends Controller
     }
 
     /**
-     * Search credentials
+     * Search credentials and groups
      */
     public function search(Request $request)
     {
-        $query = $request->get('q');
-        
-        $credentials = Credential::with('group')
-            ->where('created_by', auth()->id())
-            ->where(function($q) use ($query) {
-                $q->where('title', 'like', "%{$query}%")
-                  ->orWhere('username', 'like', "%{$query}%")
-                  ->orWhere('url', 'like', "%{$query}%")
-                  ->orWhere('notes', 'like', "%{$query}%");
-            })
-            ->get();
+        $query = trim((string) $request->get('q', ''));
 
-        return Inertia::render('Credentials/Search', [
+        $credentials = collect();
+        $groups = collect();
+
+        if ($query !== '') {
+            $credentials = Credential::with('group')
+                ->where('created_by', auth()->id())
+                ->where(function($q) use ($query) {
+                    $q->where('title', 'like', "%{$query}%")
+                      ->orWhere('username', 'like', "%{$query}%")
+                      ->orWhere('url', 'like', "%{$query}%")
+                      ->orWhere('notes', 'like', "%{$query}%");
+                })
+                ->limit(100)
+                ->get()
+                ->map(function ($credential) {
+                    $credential->credential_entries = $credential->getAllCredentialEntries();
+                    return $credential;
+                });
+
+            $groups = Group::where('created_by', auth()->id())
+                ->where(function($q) use ($query) {
+                    $q->where('name', 'like', "%{$query}%")
+                      ->orWhere('description', 'like', "%{$query}%");
+                })
+                ->orderBy('name')
+                ->limit(100)
+                ->get();
+        }
+
+        return Inertia::render('Search', [
             'credentials' => $credentials,
+            'groups' => $groups,
             'query' => $query
         ]);
     }
