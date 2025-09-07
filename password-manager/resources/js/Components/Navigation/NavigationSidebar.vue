@@ -77,42 +77,82 @@
                 </div>
             </div>
 
-            <!-- Modules -->
+            <!-- Modules (Main + Submodules) -->
             <div class="mb-6">
                 <h3 v-if="!collapsed" class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
                     Modules
                 </h3>
                 <div class="space-y-1">
-                    <Link
-                        :href="route('credentials.index', { module: 'backend' })"
-                        class="w-full flex items-center space-x-3 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
-                        :title="collapsed ? 'Backend' : ''"
-                    >
-                        <svg class="w-5 h-5 flex-shrink-0 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18" />
-                        </svg>
-                        <span v-if="!collapsed">Backend</span>
-                    </Link>
-                    <Link
-                        :href="route('credentials.index', { module: 'cache' })"
-                        class="w-full flex items-center space-x-3 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
-                        :title="collapsed ? 'Cache' : ''"
-                    >
-                        <svg class="w-5 h-5 flex-shrink-0 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                        </svg>
-                        <span v-if="!collapsed">Cache</span>
-                    </Link>
-                    <Link
-                        :href="route('credentials.index', { module: 'database' })"
-                        class="w-full flex items-center space-x-3 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
-                        :title="collapsed ? 'Database' : ''"
-                    >
-                        <svg class="w-5 h-5 flex-shrink-0 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3c4.418 0 8 1.79 8 4v10c0 2.21-3.582 4-8 4s-8-1.79-8-4V7c0-2.21 3.582-4 8-4zM4 12c0 2.21 3.582 4 8 4s8-1.79 8-4" />
-                        </svg>
-                        <span v-if="!collapsed">Database</span>
-                    </Link>
+                    <!-- Credentials Module -->
+                    <div>
+                        <button
+                            @click="expanded.credentials = !expanded.credentials"
+                            class="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                            :title="collapsed ? 'Credentials' : ''"
+                        >
+                            <div class="flex items-center space-x-3">
+                                <svg class="w-5 h-5 flex-shrink-0 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c1.657 0 3-1.567 3-3.5S13.657 4 12 4 9 5.567 9 7.5 10.343 11 12 11zm0 2c-2.761 0-5 2.015-5 4.5V19h10v-1.5c0-2.485-2.239-4.5-5-4.5z" />
+                                </svg>
+                                <span v-if="!collapsed">Credentials</span>
+                            </div>
+                            <svg v-if="!collapsed" class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path v-if="expanded.credentials" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                                <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <div v-if="expanded.credentials && !collapsed" class="mt-1 ml-3 space-y-1">
+                            <Link :href="route('credentials.index')" class="block px-3 py-1.5 rounded-md text-sm text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700">List</Link>
+                            <Link :href="route('credentials.create')" class="block px-3 py-1.5 rounded-md text-sm text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700">Create</Link>
+                        </div>
+                    </div>
+
+                    <!-- Groups Module -->
+                    <div>
+                        <button
+                            @click="expanded.groups = !expanded.groups"
+                            class="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                            :title="collapsed ? 'Groups' : ''"
+                        >
+                            <div class="flex items-center space-x-3">
+                                <svg class="w-5 h-5 flex-shrink-0 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m10-6.26a4 4 0 11-8 0 4 4 0 018 0zM7 10a4 4 0 118 0 4 4 0 01-8 0z" />
+                                </svg>
+                                <span v-if="!collapsed">Groups</span>
+                            </div>
+                            <svg v-if="!collapsed" class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path v-if="expanded.groups" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                                <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <div v-if="expanded.groups && !collapsed" class="mt-1 ml-3 space-y-1">
+                            <Link :href="route('groups.index')" class="block px-3 py-1.5 rounded-md text-sm text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700">List</Link>
+                            <Link :href="route('groups.create')" class="block px-3 py-1.5 rounded-md text-sm text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700">Create</Link>
+                        </div>
+                    </div>
+
+                    <!-- Audit Logs Module -->
+                    <div>
+                        <button
+                            @click="expanded.audit = !expanded.audit"
+                            class="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                            :title="collapsed ? 'Audit Logs' : ''"
+                        >
+                            <div class="flex items-center space-x-3">
+                                <svg class="w-5 h-5 flex-shrink-0 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                <span v-if="!collapsed">Audit Logs</span>
+                            </div>
+                            <svg v-if="!collapsed" class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path v-if="expanded.audit" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                                <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <div v-if="expanded.audit && !collapsed" class="mt-1 ml-3 space-y-1">
+                            <Link :href="route('audit-logs.index')" class="block px-3 py-1.5 rounded-md text-sm text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700">View</Link>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -172,7 +212,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, reactive } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import NavigationItem from './NavigationItem.vue';
 
@@ -203,5 +243,12 @@ const sidebarClasses = computed(() => {
         'w-64': !props.collapsed,
         'w-16': props.collapsed,
     };
+});
+
+// Track which modules are expanded
+const expanded = reactive({
+    credentials: true,
+    groups: true,
+    audit: false,
 });
 </script>
