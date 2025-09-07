@@ -77,6 +77,45 @@
                 </div>
             </div>
 
+            <!-- Modules -->
+            <div class="mb-6">
+                <h3 v-if="!collapsed" class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                    Modules
+                </h3>
+                <div class="space-y-1">
+                    <Link
+                        :href="route('credentials.index', { module: 'backend' })"
+                        class="w-full flex items-center space-x-3 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
+                        :title="collapsed ? 'Backend' : ''"
+                    >
+                        <svg class="w-5 h-5 flex-shrink-0 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18" />
+                        </svg>
+                        <span v-if="!collapsed">Backend</span>
+                    </Link>
+                    <Link
+                        :href="route('credentials.index', { module: 'cache' })"
+                        class="w-full flex items-center space-x-3 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
+                        :title="collapsed ? 'Cache' : ''"
+                    >
+                        <svg class="w-5 h-5 flex-shrink-0 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                        </svg>
+                        <span v-if="!collapsed">Cache</span>
+                    </Link>
+                    <Link
+                        :href="route('credentials.index', { module: 'database' })"
+                        class="w-full flex items-center space-x-3 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
+                        :title="collapsed ? 'Database' : ''"
+                    >
+                        <svg class="w-5 h-5 flex-shrink-0 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3c4.418 0 8 1.79 8 4v10c0 2.21-3.582 4-8 4s-8-1.79-8-4V7c0-2.21 3.582-4 8-4zM4 12c0 2.21 3.582 4 8 4s8-1.79 8-4" />
+                        </svg>
+                        <span v-if="!collapsed">Database</span>
+                    </Link>
+                </div>
+            </div>
+
             <!-- Navigation Tree -->
             <div>
                 <h3 v-if="!collapsed" class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
