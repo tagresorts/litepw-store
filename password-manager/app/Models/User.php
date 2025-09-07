@@ -130,15 +130,15 @@ class User extends Authenticatable
      * Resolve effective permission for a group by walking up the hierarchy.
      * Allowed permissions: read, write, admin
      */
-    public function resolveGroupPermission(?Group $group): ?string
+    public function resolveGroupPermission(?Group $group): ?array
     {
         $current = $group;
         while ($current) {
             $perm = $this->groupPermissions()
                 ->where('group_id', $current->id)
-                ->value('permission_type');
+                ->first(['effect','level']);
             if ($perm) {
-                return $perm;
+                return ['effect' => $perm->effect, 'level' => $perm->level];
             }
             $current = $current->parent ?? null;
         }
@@ -161,8 +161,13 @@ class User extends Authenticatable
         // Resolve from credential's group
         $group = $credential->group ?? null;
         $perm = $this->resolveGroupPermission($group);
-        if ($perm && $order[$perm] >= $order[$level]) {
-            return true;
+        if ($perm) {
+            if ($perm['effect'] === 'deny') {
+                return false;
+            }
+            if ($order[$perm['level']] >= $order[$level]) {
+                return true;
+            }
         }
 
         return false;
@@ -175,7 +180,9 @@ class User extends Authenticatable
     {
         $order = ['read' => 1, 'write' => 2, 'admin' => 3];
         $perm = $this->resolveGroupPermission($group);
-        return $perm ? ($order[$perm] >= $order[$level]) : false;
+        if (!$perm) return false;
+        if ($perm['effect'] === 'deny') return false;
+        return $order[$perm['level']] >= $order[$level];
     }
 
     /**

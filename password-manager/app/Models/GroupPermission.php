@@ -13,7 +13,8 @@ class GroupPermission extends Model
     protected $fillable = [
         'user_id',
         'group_id',
-        'permission_type',
+        'effect',
+        'level',
         'can_export',
         'can_share',
     ];
@@ -44,7 +45,7 @@ class GroupPermission extends Model
      */
     public function canRead(): bool
     {
-        return in_array($this->permission_type, ['read', 'write', 'admin']);
+        return in_array($this->level, ['read', 'write', 'admin']) && $this->effect === 'allow';
     }
 
     /**
@@ -52,7 +53,7 @@ class GroupPermission extends Model
      */
     public function canWrite(): bool
     {
-        return in_array($this->permission_type, ['write', 'admin']);
+        return in_array($this->level, ['write', 'admin']) && $this->effect === 'allow';
     }
 
     /**
@@ -60,6 +61,6 @@ class GroupPermission extends Model
      */
     public function isAdmin(): bool
     {
-        return $this->permission_type === 'admin';
+        return $this->level === 'admin' && $this->effect === 'allow';
     }
 }
