@@ -14,19 +14,19 @@
                     <div class="p-6">
                         <form @submit.prevent="submit" class="space-y-6">
                             <div>
-                                <label for="name" class="block text-sm font-medium text-gray-700">
-                                    Name *
+                                <label for="title" class="block text-sm font-medium text-gray-700">
+                                    Title *
                                 </label>
                                 <input
-                                    id="name"
-                                    v-model="form.name"
+                                    id="title"
+                                    v-model="form.title"
                                     type="text"
                                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                    :class="{ 'border-red-500': form.errors.name }"
+                                    :class="{ 'border-red-500': form.errors.title }"
                                     required
                                 />
-                                <p v-if="form.errors.name" class="mt-1 text-sm text-red-600">
-                                    {{ form.errors.name }}
+                                <p v-if="form.errors.title" class="mt-1 text-sm text-red-600">
+                                    {{ form.errors.title }}
                                 </p>
                             </div>
 
@@ -185,7 +185,7 @@ const props = defineProps<Props>();
 const showPassword = ref(false);
 
 const form = useForm({
-    name: '',
+    title: '',
     username: '',
     password: '',
     url: '',

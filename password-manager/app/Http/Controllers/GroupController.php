@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Group;
+use App\Models\Credential;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class GroupController extends Controller
 {
@@ -11,7 +14,14 @@ class GroupController extends Controller
      */
     public function index()
     {
-        //
+        $groups = Group::where('user_id', auth()->id())
+            ->withCount('credentials')
+            ->orderBy('name')
+            ->get();
+
+        return Inertia::render('Groups/Index', [
+            'groups' => $groups
+        ]);
     }
 
     /**
@@ -19,7 +29,7 @@ class GroupController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('Groups/Create');
     }
 
     /**
@@ -27,38 +37,154 @@ class GroupController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'color' => 'nullable|string|max:7',
+            'parent_id' => 'nullable|exists:groups,id',
+        ]);
+
+        Group::create([
+            'name' => $request->name,
+            'description' => $request->description,
+            'color' => $request->color ?? '#3B82F6',
+            'parent_id' => $request->parent_id,
+            'user_id' => auth()->id(),
+        ]);
+
+        return redirect()->route('groups.index')
+            ->with('success', 'Group created successfully.');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Group $group)
     {
-        //
+        if ($group->user_id !== auth()->id()) {
+            abort(403);
+        }
+        
+        $credentials = Credential::where('group_id', $group->id)
+            ->where('user_id', auth()->id())
+            ->orderBy('title')
+            ->get();
+
+        return Inertia::render('Groups/Show', [
+            'group' => $group,
+            'credentials' => $credentials
+        ]);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Group $group)
     {
-        //
+        if ($group->user_id !== auth()->id()) {
+            abort(403);
+        }
+        
+        return Inertia::render('Groups/Edit', [
+            'group' => $group
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Group $group)
     {
-        //
+        if ($group->user_id !== auth()->id()) {
+            abort(403);
+        }
+        
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'color' => 'nullable|string|max:7',
+        ]);
+
+        $group->update([
+            'name' => $request->name,
+            'description' => $request->description,
+            'color' => $request->color ?? $group->color,
+        ]);
+
+        return redirect()->route('groups.index')
+            ->with('success', 'Group updated successfully.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Group $group)
     {
-        //
+        if ($group->user_id !== auth()->id()) {
+            abort(403);
+        }
+        
+        // Move credentials to ungrouped (null group_id)
+        Credential::where('group_id', $group->id)
+            ->where('user_id', auth()->id())
+            ->update(['group_id' => null]);
+        
+        $group->delete();
+
+        return redirect()->route('groups.index')
+            ->with('success', 'Group deleted successfully.');
+    }
+
+    /**
+     * Move credentials between groups
+     */
+    public function move(Request $request, Group $group)
+    {
+        if ($group->user_id !== auth()->id()) {
+            abort(403);
+        }
+        
+        $request->validate([
+            'credential_ids' => 'required|array',
+            'credential_ids.*' => 'exists:credentials,id',
+            'target_group_id' => 'nullable|exists:groups,id',
+        ]);
+
+        Credential::whereIn('id', $request->credential_ids)
+            ->where('user_id', auth()->id())
+            ->update(['group_id' => $request->target_group_id]);
+
+        return response()->json(['message' => 'Credentials moved successfully.']);
+    }
+
+    /**
+     * Export group credentials
+     */
+    public function export(Group $group)
+    {
+        if ($group->user_id !== auth()->id()) {
+            abort(403);
+        }
+        
+        $credentials = Credential::where('group_id', $group->id)
+            ->where('user_id', auth()->id())
+            ->get();
+
+        $csvData = "Title,Username,Password,URL,Notes\n";
+        
+        foreach ($credentials as $credential) {
+            $csvData .= sprintf(
+                '"%s","%s","%s","%s","%s"' . "\n",
+                $credential->title,
+                $credential->username,
+                decrypt($credential->password),
+                $credential->url ?? '',
+                $credential->notes ?? ''
+            );
+        }
+
+        return response($csvData)
+            ->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', 'attachment; filename="' . $group->name . '_credentials.csv"');
     }
 }
