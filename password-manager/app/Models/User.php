@@ -178,6 +178,10 @@ class User extends Authenticatable
      */
     public function canAccessGroup(Group $group, string $level = 'read'): bool
     {
+        // Creator of the group always has full access
+        if ($group->created_by === $this->id) {
+            return true;
+        }
         $order = ['read' => 1, 'write' => 2, 'admin' => 3];
         $perm = $this->resolveGroupPermission($group);
         if (!$perm) return false;

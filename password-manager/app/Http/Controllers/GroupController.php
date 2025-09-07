@@ -19,7 +19,7 @@ class GroupController extends Controller
             ->orderBy('level')
             ->orderBy('name')
             ->get()
-            ->filter(fn($g) => $user->canAccessGroup($g, 'read'))
+            ->filter(fn($g) => $g->created_by === $user->id || $user->canAccessGroup($g, 'read'))
             ->values();
 
         $navigationTree = $this->getNavigationTree();
