@@ -105,7 +105,9 @@
                                     <div class="flex-1">
                                         <h4 class="font-medium text-gray-900">{{ credential.title }}</h4>
                                         <p class="text-sm text-gray-600">{{ credential.username }}</p>
-                                        <p v-if="credential.url" class="text-xs text-gray-500 mt-1 truncate">{{ credential.url }}</p>
+                                        <p v-if="credential.url" class="text-xs text-blue-600 mt-1 truncate">
+                                            <a :href="credential.url" target="_blank" rel="noopener noreferrer" class="hover:underline">{{ credential.url }}</a>
+                                        </p>
                                         <div v-if="credential.group" class="mt-2">
                                             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                                 {{ credential.group.name }}

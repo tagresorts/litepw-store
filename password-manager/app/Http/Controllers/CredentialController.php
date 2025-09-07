@@ -342,8 +342,8 @@ class CredentialController extends Controller
         }
 
         return Inertia::render('Search', [
-            'credentials' => $credentials,
-            'groups' => $groups,
+            'credentials' => $credentials->values(),
+            'groups' => $groups->values(),
             'query' => $query
         ]);
     }
