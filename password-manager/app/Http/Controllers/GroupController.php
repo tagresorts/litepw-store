@@ -14,7 +14,7 @@ class GroupController extends Controller
      */
     public function index()
     {
-        $groups = Group::where('user_id', auth()->id())
+        $groups = Group::where('created_by', auth()->id())
             ->withCount('credentials')
             ->orderBy('name')
             ->get();
@@ -54,9 +54,8 @@ class GroupController extends Controller
         Group::create([
             'name' => $request->name,
             'description' => $request->description,
-            'color' => $request->color ?? '#3B82F6',
             'parent_id' => $request->parent_id,
-            'user_id' => auth()->id(),
+            'created_by' => auth()->id(),
         ]);
 
         return redirect()->route('groups.index')
@@ -68,12 +67,12 @@ class GroupController extends Controller
      */
     public function show(Group $group)
     {
-        if ($group->user_id !== auth()->id()) {
+        if ($group->created_by !== auth()->id()) {
             abort(403);
         }
         
         $credentials = Credential::where('group_id', $group->id)
-            ->where('user_id', auth()->id())
+            ->where('created_by', auth()->id())
             ->orderBy('title')
             ->get();
 
@@ -88,7 +87,7 @@ class GroupController extends Controller
      */
     public function edit(Group $group)
     {
-        if ($group->user_id !== auth()->id()) {
+        if ($group->created_by !== auth()->id()) {
             abort(403);
         }
         
@@ -102,7 +101,7 @@ class GroupController extends Controller
      */
     public function update(Request $request, Group $group)
     {
-        if ($group->user_id !== auth()->id()) {
+        if ($group->created_by !== auth()->id()) {
             abort(403);
         }
         
@@ -127,13 +126,13 @@ class GroupController extends Controller
      */
     public function destroy(Group $group)
     {
-        if ($group->user_id !== auth()->id()) {
+        if ($group->created_by !== auth()->id()) {
             abort(403);
         }
         
         // Move credentials to ungrouped (null group_id)
         Credential::where('group_id', $group->id)
-            ->where('user_id', auth()->id())
+            ->where('created_by', auth()->id())
             ->update(['group_id' => null]);
         
         $group->delete();
@@ -147,7 +146,7 @@ class GroupController extends Controller
      */
     public function move(Request $request, Group $group)
     {
-        if ($group->user_id !== auth()->id()) {
+        if ($group->created_by !== auth()->id()) {
             abort(403);
         }
         
@@ -158,7 +157,7 @@ class GroupController extends Controller
         ]);
 
         Credential::whereIn('id', $request->credential_ids)
-            ->where('user_id', auth()->id())
+            ->where('created_by', auth()->id())
             ->update(['group_id' => $request->target_group_id]);
 
         return response()->json(['message' => 'Credentials moved successfully.']);
@@ -169,12 +168,12 @@ class GroupController extends Controller
      */
     public function export(Group $group)
     {
-        if ($group->user_id !== auth()->id()) {
+        if ($group->created_by !== auth()->id()) {
             abort(403);
         }
         
         $credentials = Credential::where('group_id', $group->id)
-            ->where('user_id', auth()->id())
+            ->where('created_by', auth()->id())
             ->get();
 
         $csvData = "Title,Username,Password,URL,Notes\n";
@@ -200,7 +199,7 @@ class GroupController extends Controller
      */
     private function getNavigationTree()
     {
-        $groups = Group::where('user_id', auth()->id())
+        $groups = Group::where('created_by', auth()->id())
             ->orderBy('name')
             ->get();
 

@@ -15,7 +15,7 @@ class CredentialController extends Controller
     public function index()
     {
         $credentials = Credential::with('group')
-            ->where('user_id', auth()->id())
+            ->where('created_by', auth()->id())
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -32,7 +32,7 @@ class CredentialController extends Controller
      */
     public function create()
     {
-        $groups = Group::where('user_id', auth()->id())->get();
+        $groups = Group::where('created_by', auth()->id())->get();
         $navigationTree = $this->getNavigationTree();
         
         return Inertia::render('Credentials/Create', [
@@ -58,11 +58,11 @@ class CredentialController extends Controller
         Credential::create([
             'title' => $request->title,
             'username' => $request->username,
-            'password' => encrypt($request->password),
+            'encrypted_password' => encrypt($request->password),
             'url' => $request->url,
             'notes' => $request->notes,
             'group_id' => $request->group_id,
-            'user_id' => auth()->id(),
+            'created_by' => auth()->id(),
         ]);
 
         return redirect()->route('credentials.index')
@@ -74,7 +74,7 @@ class CredentialController extends Controller
      */
     public function show(Credential $credential)
     {
-        if ($credential->user_id !== auth()->id()) {
+        if ($credential->created_by !== auth()->id()) {
             abort(403);
         }
         
@@ -88,11 +88,11 @@ class CredentialController extends Controller
      */
     public function edit(Credential $credential)
     {
-        if ($credential->user_id !== auth()->id()) {
+        if ($credential->created_by !== auth()->id()) {
             abort(403);
         }
         
-        $groups = Group::where('user_id', auth()->id())->get();
+        $groups = Group::where('created_by', auth()->id())->get();
         
         return Inertia::render('Credentials/Edit', [
             'credential' => $credential,
@@ -105,7 +105,7 @@ class CredentialController extends Controller
      */
     public function update(Request $request, Credential $credential)
     {
-        if ($credential->user_id !== auth()->id()) {
+        if ($credential->created_by !== auth()->id()) {
             abort(403);
         }
         
@@ -121,7 +121,7 @@ class CredentialController extends Controller
         $credential->update([
             'title' => $request->title,
             'username' => $request->username,
-            'password' => encrypt($request->password),
+            'encrypted_password' => encrypt($request->password),
             'url' => $request->url,
             'notes' => $request->notes,
             'group_id' => $request->group_id,
@@ -136,7 +136,7 @@ class CredentialController extends Controller
      */
     public function destroy(Credential $credential)
     {
-        if ($credential->user_id !== auth()->id()) {
+        if ($credential->created_by !== auth()->id()) {
             abort(403);
         }
         
@@ -151,7 +151,7 @@ class CredentialController extends Controller
      */
     public function toggleFavorite(Credential $credential)
     {
-        if ($credential->user_id !== auth()->id()) {
+        if ($credential->created_by !== auth()->id()) {
             abort(403);
         }
         
@@ -188,7 +188,7 @@ class CredentialController extends Controller
      */
     public function getPassword(Credential $credential)
     {
-        if ($credential->user_id !== auth()->id()) {
+        if ($credential->created_by !== auth()->id()) {
             abort(403);
         }
         
@@ -203,7 +203,7 @@ class CredentialController extends Controller
         $query = $request->get('q');
         
         $credentials = Credential::with('group')
-            ->where('user_id', auth()->id())
+            ->where('created_by', auth()->id())
             ->where(function($q) use ($query) {
                 $q->where('title', 'like', "%{$query}%")
                   ->orWhere('username', 'like', "%{$query}%")
@@ -223,7 +223,7 @@ class CredentialController extends Controller
      */
     private function getNavigationTree()
     {
-        $groups = Group::where('user_id', auth()->id())
+        $groups = Group::where('created_by', auth()->id())
             ->orderBy('name')
             ->get();
 

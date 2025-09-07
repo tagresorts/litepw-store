@@ -20,7 +20,7 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->json('tags')->nullable(); // JSON array of tags
             $table->json('custom_fields')->nullable(); // Additional custom fields
-            $table->foreignId('group_id')->constrained()->onDelete('cascade');
+            $table->foreignId('group_id')->nullable()->constrained()->onDelete('set null');
             $table->foreignId('created_by')->constrained('users');
             $table->foreignId('updated_by')->nullable()->constrained('users');
             $table->timestamp('password_changed_at')->nullable();
