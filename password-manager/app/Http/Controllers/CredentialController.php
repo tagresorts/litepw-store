@@ -142,11 +142,16 @@ class CredentialController extends Controller
             abort(403);
         }
         
-        $groups = Group::where('created_by', auth()->id())->get();
+        // Add dynamic credential entries
+        $credential->credential_entries = $credential->getAllCredentialEntries();
+        $credential->entry_count = $credential->getCredentialEntryCount();
+        
+        $groups = Group::where('created_by', auth()->id())->orderBy('level')->orderBy('name')->get();
         
         return Inertia::render('Credentials/Edit', [
             'credential' => $credential,
-            'groups' => $groups
+            'groups' => $groups,
+            'navigationTree' => $this->getNavigationTree()
         ]);
     }
 
@@ -161,21 +166,76 @@ class CredentialController extends Controller
         
         $request->validate([
             'title' => 'required|string|max:255',
-            'username' => 'required|string|max:255',
-            'password' => 'required|string',
-            'url' => 'nullable|url',
+            'credential_entries' => 'required|array|min:1',
+            'credential_entries.*.username' => 'required|string|max:255',
+            'credential_entries.*.password' => 'required|string',
+            'credential_entries.*.urls' => 'array',
+            'credential_entries.*.urls.*' => 'nullable|string',
             'notes' => 'nullable|string',
             'group_id' => 'nullable|exists:groups,id',
         ]);
 
-        $credential->update([
+        // Prepare data for all credential entries
+        $credentialData = [
             'title' => $request->title,
-            'username' => $request->username,
-            'encrypted_password' => encrypt($request->password),
-            'url' => $request->url,
             'notes' => $request->notes,
             'group_id' => $request->group_id,
-        ]);
+        ];
+
+        // Clear all existing credential fields first
+        $clearFields = [
+            'username', 'encrypted_password', 'url',
+            'username_2', 'encrypted_password_2',
+            'username_3', 'encrypted_password_3',
+            'username_4', 'encrypted_password_4',
+            'username_5', 'encrypted_password_5',
+            'username_6', 'encrypted_password_6',
+            'url_2', 'url_3', 'url_4', 'url_5', 'url_6',
+            'url_7', 'url_8', 'url_9', 'url_10',
+        ];
+
+        foreach ($clearFields as $field) {
+            $credentialData[$field] = null;
+        }
+
+        // Process up to 6 credential entries
+        $maxEntries = min(6, count($request->credential_entries));
+        
+        for ($i = 0; $i < $maxEntries; $i++) {
+            $entry = $request->credential_entries[$i];
+            $entryNum = $i + 1;
+            
+            if ($entryNum === 1) {
+                // Primary entry
+                $credentialData['username'] = $entry['username'];
+                $credentialData['encrypted_password'] = encrypt($entry['password']);
+                $credentialData['url'] = !empty($entry['urls']) ? $entry['urls'][0] : null;
+            } else {
+                // Additional entries
+                $credentialData["username_{$entryNum}"] = $entry['username'];
+                $credentialData["encrypted_password_{$entryNum}"] = encrypt($entry['password']);
+            }
+            
+            // Store additional URLs (up to 10 total)
+            $urlIndex = 1;
+            foreach ($entry['urls'] as $url) {
+                if ($url && trim($url)) {
+                    if ($entryNum === 1 && $urlIndex === 1) {
+                        // First URL already stored in 'url' field
+                        $urlIndex++;
+                        continue;
+                    }
+                    
+                    $urlField = $entryNum === 1 ? "url_{$urlIndex}" : "url_" . (($entryNum - 1) * 2 + $urlIndex);
+                    if ($urlIndex <= 10) {
+                        $credentialData[$urlField] = $url;
+                        $urlIndex++;
+                    }
+                }
+            }
+        }
+
+        $credential->update($credentialData);
 
         return redirect()->route('credentials.index')
             ->with('success', 'Credential updated successfully.');

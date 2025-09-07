@@ -1,11 +1,9 @@
 <template>
     <Head title="Edit Credential" />
 
-    <AuthenticatedLayout>
+    <SidebarLayout>
         <template #header>
-            <h2 class="text-xl font-semibold leading-tight text-gray-800">
-                Edit Credential
-            </h2>
+            Edit Credential
         </template>
 
         <div class="py-12">
@@ -14,93 +12,75 @@
                     <div class="p-6">
                         <form @submit.prevent="submit" class="space-y-6">
                             <div>
-                                <label for="name" class="block text-sm font-medium text-gray-700">
-                                    Name *
+                                <label for="title" class="block text-sm font-medium text-gray-700">
+                                    Title *
                                 </label>
                                 <input
-                                    id="name"
-                                    v-model="form.name"
+                                    id="title"
+                                    v-model="form.title"
                                     type="text"
                                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                    :class="{ 'border-red-500': form.errors.name }"
+                                    :class="{ 'border-red-500': form.errors.title }"
                                     required
                                 />
-                                <p v-if="form.errors.name" class="mt-1 text-sm text-red-600">
-                                    {{ form.errors.name }}
+                                <p v-if="form.errors.title" class="mt-1 text-sm text-red-600">
+                                    {{ form.errors.title }}
                                 </p>
                             </div>
 
+                            <!-- Multiple Username/Password Entries -->
                             <div>
-                                <label for="username" class="block text-sm font-medium text-gray-700">
-                                    Username/Email *
-                                </label>
-                                <input
-                                    id="username"
-                                    v-model="form.username"
-                                    type="text"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                    :class="{ 'border-red-500': form.errors.username }"
-                                    required
-                                />
-                                <p v-if="form.errors.username" class="mt-1 text-sm text-red-600">
-                                    {{ form.errors.username }}
-                                </p>
-                            </div>
-
-                            <div>
-                                <label for="password" class="block text-sm font-medium text-gray-700">
-                                    Password *
-                                </label>
-                                <div class="mt-1 flex rounded-md shadow-sm">
-                                    <input
-                                        id="password"
-                                        v-model="form.password"
-                                        :type="showPassword ? 'text' : 'password'"
-                                        class="flex-1 rounded-l-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
-                                        :class="{ 'border-red-500': form.errors.password }"
-                                        required
-                                    />
+                                <div class="flex items-center justify-between mb-2">
+                                    <label class="block text-sm font-medium text-gray-700">
+                                        Username/Password Entries *
+                                    </label>
                                     <button
                                         type="button"
-                                        @click="showPassword = !showPassword"
-                                        class="inline-flex items-center px-3 py-2 border border-l-0 border-gray-300 bg-gray-50 text-gray-500 text-sm rounded-r-md hover:bg-gray-100"
+                                        @click="addCredentialEntry"
+                                        :disabled="credentialEntries.length >= 6"
+                                        class="inline-flex items-center px-3 py-1 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                                     >
-                                        <svg v-if="showPassword" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                                         </svg>
-                                        <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
+                                        {{ credentialEntries.length >= 6 ? 'Max Entries (6)' : 'Add Entry' }}
                                     </button>
                                 </div>
-                                <div class="mt-2 flex space-x-2">
-                                    <button
-                                        type="button"
-                                        @click="generatePassword"
-                                        class="text-sm text-indigo-600 hover:text-indigo-500"
-                                    >
-                                        Generate New Password
-                                    </button>
-                                </div>
-                                <p v-if="form.errors.password" class="mt-1 text-sm text-red-600">
-                                    {{ form.errors.password }}
+                                
+                                <CredentialEntries
+                                    :entries="credentialEntries"
+                                    @remove-entry="removeCredentialEntry"
+                                    @generate-password="generatePasswordForEntry"
+                                    @add-url="addUrlToEntry"
+                                    @remove-url="removeUrlFromEntry"
+                                />
+                                
+                                <p v-if="form.errors.credential_entries" class="mt-2 text-sm text-red-600">
+                                    {{ form.errors.credential_entries }}
                                 </p>
                             </div>
 
                             <div>
-                                <label for="url" class="block text-sm font-medium text-gray-700">
-                                    URL
+                                <label for="group_id" class="block text-sm font-medium text-gray-700">
+                                    Group
                                 </label>
-                                <input
-                                    id="url"
-                                    v-model="form.url"
-                                    type="url"
+                                <select
+                                    id="group_id"
+                                    v-model="form.group_id"
                                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                    :class="{ 'border-red-500': form.errors.url }"
-                                />
-                                <p v-if="form.errors.url" class="mt-1 text-sm text-red-600">
-                                    {{ form.errors.url }}
+                                    :class="{ 'border-red-500': form.errors.group_id }"
+                                >
+                                    <option value="">No Group</option>
+                                    <option
+                                        v-for="group in groups"
+                                        :key="group.id"
+                                        :value="group.id"
+                                    >
+                                        {{ '  '.repeat(group.level || 0) }}{{ group.name }}
+                                    </option>
+                                </select>
+                                <p v-if="form.errors.group_id" class="mt-1 text-sm text-red-600">
+                                    {{ form.errors.group_id }}
                                 </p>
                             </div>
 
@@ -117,25 +97,6 @@
                                 ></textarea>
                                 <p v-if="form.errors.notes" class="mt-1 text-sm text-red-600">
                                     {{ form.errors.notes }}
-                                </p>
-                            </div>
-
-                            <div>
-                                <label for="group_id" class="block text-sm font-medium text-gray-700">
-                                    Group
-                                </label>
-                                <select
-                                    id="group_id"
-                                    v-model="form.group_id"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                >
-                                    <option value="">Select a group (optional)</option>
-                                    <option v-for="group in groups" :key="group.id" :value="group.id">
-                                        {{ group.name }}
-                                    </option>
-                                </select>
-                                <p v-if="form.errors.group_id" class="mt-1 text-sm text-red-600">
-                                    {{ form.errors.group_id }}
                                 </p>
                             </div>
 
@@ -163,52 +124,121 @@
                 </div>
             </div>
         </div>
-    </AuthenticatedLayout>
+    </SidebarLayout>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import SidebarLayout from '@/Layouts/SidebarLayout.vue';
+import CredentialEntries from '@/Components/Credentials/CredentialEntries.vue';
 
 interface Group {
     id: number;
     name: string;
+    level: number;
+}
+
+interface CredentialEntry {
+    id: number;
+    username: string;
+    password: string;
+    showPassword: boolean;
+    urls: Array<{ value: string }>;
 }
 
 interface Credential {
     id: number;
-    name: string;
+    title: string;
     username: string;
-    password: string;
     url: string;
     notes: string;
     group_id: number | null;
+    credential_entries: Array<{
+        id: number;
+        username: string;
+        password: string;
+        urls: string[];
+    }>;
 }
 
 interface Props {
     credential: Credential;
     groups: Group[];
+    navigationTree: any[];
 }
 
 const props = defineProps<Props>();
 
-const showPassword = ref(false);
+let entryIdCounter = 1;
 
-const form = useForm({
-    name: props.credential.name,
-    username: props.credential.username,
-    password: props.credential.password,
-    url: props.credential.url || '',
-    notes: props.credential.notes || '',
-    group_id: props.credential.group_id || '',
+const credentialEntries = reactive<CredentialEntry[]>([]);
+
+const form: any = useForm({
+    title: '',
+    credential_entries: [] as any[],
+    notes: '',
+    group_id: '',
 });
 
-const submit = () => {
-    form.patch(route('credentials.update', props.credential.id));
+// Initialize form and credential entries from props
+onMounted(() => {
+    form.title = props.credential.title;
+    form.notes = props.credential.notes || '';
+    form.group_id = props.credential.group_id || '';
+
+    // Convert credential entries to reactive form
+    if (props.credential.credential_entries && props.credential.credential_entries.length > 0) {
+        props.credential.credential_entries.forEach((entry) => {
+            credentialEntries.push({
+                id: entryIdCounter++,
+                username: entry.username,
+                password: entry.password,
+                showPassword: false,
+                urls: entry.urls.map(url => ({ value: url }))
+            });
+        });
+    } else {
+        // Fallback to single entry if no credential_entries
+        credentialEntries.push({
+            id: entryIdCounter++,
+            username: props.credential.username,
+            password: '', // Don't pre-fill password for security
+            showPassword: false,
+            urls: props.credential.url ? [{ value: props.credential.url }] : [{ value: '' }]
+        });
+    }
+});
+
+const addCredentialEntry = () => {
+    if (credentialEntries.length < 6) {
+        credentialEntries.push({
+            id: entryIdCounter++,
+            username: '',
+            password: '',
+            showPassword: false,
+            urls: [{ value: '' }]
+        });
+    }
 };
 
-const generatePassword = async () => {
+const removeCredentialEntry = (index: number) => {
+    if (credentialEntries.length > 1) {
+        credentialEntries.splice(index, 1);
+    }
+};
+
+const addUrlToEntry = (entryIndex: number) => {
+    credentialEntries[entryIndex].urls.push({ value: '' });
+};
+
+const removeUrlFromEntry = (entryIndex: number, urlIndex: number) => {
+    if (credentialEntries[entryIndex].urls.length > 1) {
+        credentialEntries[entryIndex].urls.splice(urlIndex, 1);
+    }
+};
+
+const generatePasswordForEntry = async (entryIndex: number) => {
     try {
         const response = await fetch(route('credentials.generate-password'), {
             method: 'POST',
@@ -222,10 +252,28 @@ const generatePassword = async () => {
         
         if (response.ok) {
             const data = await response.json();
-            form.password = data.password;
+            credentialEntries[entryIndex].password = data.password;
         }
     } catch (error) {
         console.error('Failed to generate password:', error);
+        // Fallback to local generation
+        const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:,.<>?';
+        let password = '';
+        for (let i = 0; i < 16; i++) {
+            password += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        credentialEntries[entryIndex].password = password;
     }
+};
+
+const submit = () => {
+    // Prepare credential entries for submission
+    form.credential_entries = credentialEntries.map(entry => ({
+        username: entry.username,
+        password: entry.password,
+        urls: entry.urls.filter(url => url.value.trim()).map(url => url.value.trim())
+    }));
+
+    form.put(route('credentials.update', props.credential.id));
 };
 </script>
