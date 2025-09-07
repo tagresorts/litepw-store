@@ -14,11 +14,13 @@ class GroupController extends Controller
      */
     public function index()
     {
-        $groups = Group::where('created_by', auth()->id())
-            ->withCount('credentials')
+        $user = auth()->user();
+        $groups = Group::withCount('credentials')
             ->orderBy('level')
             ->orderBy('name')
-            ->get();
+            ->get()
+            ->filter(fn($g) => $user->canAccessGroup($g, 'read'))
+            ->values();
 
         $navigationTree = $this->getNavigationTree();
 
@@ -33,9 +35,8 @@ class GroupController extends Controller
      */
     public function create()
     {
-        $groups = Group::where('created_by', auth()->id())
-            ->orderBy('name')
-            ->get();
+        $user = auth()->user();
+        $groups = Group::orderBy('name')->get()->filter(fn($g) => $user->canAccessGroup($g, 'read'))->values();
             
         $navigationTree = $this->getNavigationTree();
         
@@ -79,9 +80,10 @@ class GroupController extends Controller
         }
         
         $credentials = Credential::where('group_id', $group->id)
-            ->where('created_by', auth()->id())
             ->orderBy('title')
-            ->get();
+            ->get()
+            ->filter(fn($c) => auth()->user()->canAccessCredential($c, 'read'))
+            ->values();
 
         return Inertia::render('Groups/Show', [
             'group' => $group,
@@ -100,14 +102,16 @@ class GroupController extends Controller
         }
         
         $credentials = Credential::where('group_id', $group->id)
-            ->where('created_by', auth()->id())
             ->orderBy('title')
-            ->get();
+            ->get()
+            ->filter(fn($c) => auth()->user()->canAccessCredential($c, 'read'))
+            ->values();
             
-        $availableGroups = Group::where('created_by', auth()->id())
-            ->where('id', '!=', $group->id)
+        $availableGroups = Group::where('id', '!=', $group->id)
             ->orderBy('name')
-            ->get();
+            ->get()
+            ->filter(fn($g) => auth()->user()->canAccessGroup($g, 'write'))
+            ->values();
             
         $navigationTree = $this->getNavigationTree();
         
