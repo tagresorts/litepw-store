@@ -1,7 +1,7 @@
 <template>
     <Head title="Search Results" />
 
-    <AuthenticatedLayout>
+    <SidebarLayout>
         <template #header>
             <h2 class="text-xl font-semibold leading-tight text-gray-800">
                 Search Results
@@ -135,13 +135,13 @@
                 </div>
             </div>
         </div>
-    </AuthenticatedLayout>
+    </SidebarLayout>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import SidebarLayout from '@/Layouts/SidebarLayout.vue';
 
 interface Group {
     id: number;

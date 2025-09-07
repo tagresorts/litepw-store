@@ -1,7 +1,7 @@
 <template>
     <Head title="Audit Logs" />
 
-    <AuthenticatedLayout>
+    <SidebarLayout>
         <template #header>
             <h2 class="text-xl font-semibold leading-tight text-gray-800">
                 Audit Logs
@@ -114,12 +114,12 @@
                 </div>
             </div>
         </div>
-    </AuthenticatedLayout>
+    </SidebarLayout>
 </template>
 
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import SidebarLayout from '@/Layouts/SidebarLayout.vue';
 
 interface AuditLog {
     id: number;

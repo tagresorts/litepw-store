@@ -1,7 +1,7 @@
 <template>
     <Head :title="group.name" />
 
-    <AuthenticatedLayout>
+    <SidebarLayout>
         <template #header>
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
@@ -139,12 +139,12 @@
                 </div>
             </div>
         </div>
-    </AuthenticatedLayout>
+    </SidebarLayout>
 </template>
 
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import SidebarLayout from '@/Layouts/SidebarLayout.vue';
 
 interface Group {
     id: number;
