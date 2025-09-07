@@ -125,7 +125,7 @@ class DashboardController extends Controller
                         'id' => $credential->id,
                         'title' => $credential->title,
                         'username' => $credential->username,
-                        'group' => $credential->group->name,
+                        'group' => $credential->group?->name ?? 'No Group',
                         'type' => 'favorite',
                     ];
                 });
@@ -142,7 +142,7 @@ class DashboardController extends Controller
                         'id' => $credential->id,
                         'title' => $credential->title,
                         'username' => $credential->username,
-                        'group' => $credential->group->name,
+                        'group' => $credential->group?->name ?? 'No Group',
                         'type' => 'recent',
                         'last_accessed' => $credential->last_accessed_at?->diffForHumans(),
                     ];
@@ -201,7 +201,7 @@ class DashboardController extends Controller
                 return [
                     'id' => $credential->id,
                     'title' => $credential->title,
-                    'group' => $credential->group->name,
+                    'group' => $credential->group?->name ?? 'No Group',
                     'updated_by' => $credential->updater?->name ?? 'Unknown',
                     'updated_at' => $credential->updated_at->diffForHumans(),
                 ];
